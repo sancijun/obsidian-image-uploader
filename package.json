@@ -1,0 +1,40 @@
+{
+  "name": "obsidian-image-uploader",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "自动将图片直接上传到博客网站获取对应图片链接，或者基于 PicGo 自动上传到图床。",
+  "main": "main.js",
+  "scripts": {
+    "dev": "rollup --config rollup.config.js -w",
+    "build": "rollup --config rollup.config.js && zip -rj obsidian-image-uploader.zip dist"
+  },
+  "keywords": [
+    "obsidian.md",
+    "picgo",
+    "image",
+    "blog"
+  ],
+  "author": "三此君",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@types/electron": "^1.6.10",
+    "@types/node": "^14.14.2",
+    "@types/xml2js": "^0.4.11",
+    "obsidian": "^1.2.8",
+    "rollup": "^3.21.6",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-zip": "^1.0.3",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "file-base64": "^1.0.0",
+    "fix-path": "^4.0.0",
+    "image-type": "^5.2.0",
+    "node-fetch": "^3.3.2"
+  }
+}

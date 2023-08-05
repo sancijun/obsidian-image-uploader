@@ -1,0 +1,16 @@
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# build
+*.js.map
+main.js
+
+# ignore
+data.json
+
+.DS_Store
+dist
