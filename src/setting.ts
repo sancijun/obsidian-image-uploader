@@ -57,6 +57,26 @@ export class SettingTab extends PluginSettingTab {
 
     containerEl.empty();
     containerEl.createEl("h2", { text: t("Plugin Settings") });
+    const contentHTML = `
+      <div>
+        <a href="https://space.bilibili.com/96271327" target="_blank">
+          <img src="https://img.shields.io/badge/-B站-9378f0?" alt="Bilibili" />
+        </a>
+        <a href="https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805232943210-456006284.jpg" target="_blank">
+          <img src="https://img.shields.io/badge/-抖音-9378f0?" alt="TikTok" />
+        </a>
+        <a href="https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805222711650-1692038416.jpg" target="_blank">
+          <img src="https://img.shields.io/badge/-公众号-9378f0?logo=Weibo" alt="公众号" />
+        </a>
+        <a href="https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805222553308-968510341.jpg" target="_blank">
+          <img src="https://img.shields.io/badge/-微信-9378f0" alt="微信" />
+        </a>
+      </div>
+    `;
+
+    const contentDiv = containerEl.createEl("div");
+    contentDiv.innerHTML = contentHTML;
+
     new Setting(containerEl)
       .setName(t("Auto pasted upload"))
       .setDesc(

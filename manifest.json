@@ -1,9 +1,9 @@
 {
-  "id": "obsidian-image-uploader",
+  "id": "sancijun-image-uploader",
   "name": "Image Uploader",
   "version": "1.0.0",
   "minAppVersion": "0.10.7",
-  "description": "自动将图片直接上传到博客网站获取对应图片链接，或者基于 PicGo 自动上传到图床。",
+  "description": "薅羊毛！博客网站当成免费且优质的图床。也支持 PicGo 上传到任意图床。",
   "author": "三此君",
   "authorUrl": "https://github.com/sancijun/obsidian-image-uploader",
   "isDesktopOnly": true

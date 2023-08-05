@@ -1,21 +1,30 @@
 # Obsidian Image Uploader
 
-这是一个支持 Blog MetaWeblog API、PicGo、PicGo-Core 上传图片到图床的工具
-**更新插件后记得重启一下 Obsidian**
+这是一个支持 Blog MetaWeblog API、PicGo、PicGo-Core 上传图片到图床的工具。
+
+什么是 Blog MetaWeblog API 呢？简单来说，就是直接将图片上传到博客网站的服务器，例如上传到博客园，开源中国。**薅博客网站的羊毛，把博客网站当成免费并且优质的图床。**
+
+你不需要新建 Github 库，不需要买腾讯云/阿里云/七牛云 OSS，不需要域名，不需要备案，不需要买 CDN ！就可以拥有性能良好的图床。
+
+**有任何问题可联系作者**：[![Bilibili](https://img.shields.io/badge/-B站-808080?)](https://space.bilibili.com/96271327) [![TikTok](https://img.shields.io/badge/-抖音-808080?)](https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805232943210-456006284.jpg) [![公众号](https://img.shields.io/badge/-公众号-808080?logo=Weibo)](https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805222711650-1692038416.jpg) [![微信](https://img.shields.io/badge/-微信-808080)](https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805222553308-968510341.jpg)
 
 # 开始
 
+## 下载安装
+
+本插件暂未发布到 Obsidian 插件市场，你可以点击链接 [obsidian-image-uploader.zip](./obsidian-image-uploader.zip) 下载插件，解压后放到 {Your Obsidain Vault}/.obsidian/plugins 目录下即可。
+
 ## 基于 Blog MetaWeblog API（推荐)
 
-什么是 Blog MetaWeblog API 呢？简单来说，就是直接将图片上传到博客网站的服务器，例如上传到博客园，开源中国。你不需要新建 Github 库，不需要买腾讯云/阿里云/七牛云，不需要买域名，备案，不需要买 CDN 就可以拥有性能良好的图床。
-
-以博客园为例：打开博客园设置，开启 MetaWebblog，获取必登录用户名，登录令牌，图片上传的接口地址（BlogURL)，用户 ID（就是接口地址最后一段，图片中就是 sancijun）
+以博客园为例：打开博客园设置，开启 MetaWebblog，获取登录用户名，登录令牌，图片上传的接口地址（BlogURL)，用户 ID（就是接口地址最后一段，图片中就是 sancijun）
 
 ![image.png](https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805155248341-460300794.jpg)
 
 打开 Obsidian 插件，设置插件参数：
 
 ![image.png](https://img2023.cnblogs.com/blog/2740513/202308/2740513-20230805160020170-452969692.png)
+
+设置完成之后复制粘贴，右键上传，批量上传图片到博客网站，Markdown 文档中自动替换成上传后的图片链接。
 
 ## 基于 PicGo
 
@@ -29,7 +38,7 @@
 
 ## 剪切板上传
 
-支持黏贴剪切板的图片的时候直接上传，目前支持复制系统内图像直接上传。
+本插件支持黏贴剪切板的图片的时候直接上传，目前支持复制系统内图像直接上传。
 支持通过设置 `frontmatter` 来控制单个文件的上传，默认值为 `true`，控制关闭请将该值设置为 `false`
 
 支持 ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg", ".tiff"
@@ -87,6 +96,10 @@ image-auto-upload: true
 - [ ] 支持添加水印
 - [ ] 支持同时使用 Blog MetaWeblog API + PicGo 作为备份
 
-# Thanks
+# 联系作者
 
-本插件是基于
+![联系作者](https://img2022.cnblogs.com/blog/2740513/202207/2740513-20220713233831988-965905513.png)
+
+# 致谢
+
+本插件是基于 [renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin) 开发，非常感谢 renmu123/obsidian-image-auto-upload-plugin。
