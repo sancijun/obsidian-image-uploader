@@ -69,20 +69,20 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   githubSetting: {
     repo: 'sancijun/images',
     branch: 'master', 
-    token: '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',
+    token: '',
     path: 'pics/',
     customUrl: `https://cdn.jsdelivr.net/gh/sancijun/images/`
   },
   giteeSetting: {
     repo: 'sancijun/pictures',
     branch: 'master',
-    token: '0539aacd4a526ab64f293e3c2880ee09',
+    token: '',
     path: '/imgs/',
     customUrl: 'https://cdn.jsdelivr.net/gh/sancijun/images/'
   },
   tencentSetting: {
-    secretId: 'AKIDQnyua3HI4ZomU1KODm59xVnqeDWZMtAB',
-    secretKey: 'pPilZ7PRDk36tQhiX7RVJsACyUlmY4LM',
+    secretId: '',
+    secretKey: '',
     region: 'ap-guangzhou',
     bucketName: 'sancijun-1255318116',
     path: '/test/',
