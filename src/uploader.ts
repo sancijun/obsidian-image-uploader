@@ -281,7 +281,7 @@ export abstract class BaseUploader {
 export class BlogUploader extends BaseUploader {
 
   async upload(imageData: string, fileName: string): Promise<string> {
-    const metaWeblogUrl = this.settings.blogSetting.blogId;
+    const metaWeblogUrl = this.settings.blogSetting.blogUrl;
     const blogId = this.settings.blogSetting.blogId;
     const username = this.settings.blogSetting.blogUserName;
     const password = this.settings.blogSetting.blogPassword;
@@ -349,7 +349,7 @@ export class BlogUploader extends BaseUploader {
       headers: headers,
       body: xmlData,
     });
-
+    
     const mediaInfo = await response.text;
     const imageUrl = await this.parseMediaInfo(mediaInfo);
     console.log('Image URL:', imageUrl);

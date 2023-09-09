@@ -1,9 +1,9 @@
 {
-  "id": "sancijun-image-uploader",
-  "name": "Image Uploader",
-  "version": "1.0.0",
+  "id": "easy-image-uploader",
+  "name": "Easy Image Uploader",
+  "version": "1.0.1",
   "minAppVersion": "0.10.7",
-  "description": "薅羊毛！博客网站当成免费且优质的图床。也支持 PicGo 上传到任意图床。",
+  "description": "简单好用的图床工具，支持直接将图片上传到博客网站、GitHub、Gitee、腾讯云，或者搭配 PicGo/PicGo-Core 使用。",
   "author": "三此君",
   "authorUrl": "https://github.com/sancijun/obsidian-image-uploader",
   "isDesktopOnly": true

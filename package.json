@@ -35,6 +35,6 @@
     "cos-js-sdk-v5": "^1.4.20",
     "file-base64": "^1.0.0",
     "fix-path": "^4.0.0",
-    "image-type": "^5.2.0",
+    "image-type": "^5.2.0"
   }
 }
