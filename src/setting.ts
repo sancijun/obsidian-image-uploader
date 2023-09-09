@@ -17,10 +17,34 @@ export interface PluginSettings {
   deleteSource: boolean;
   imageDesc: "origin" | "none" | "removeDefault";
   [propName: string]: any;
-  blogUrl: string;
-  blodId: string;
-  blogUserName: string;
-  blogPassword: string;
+  blogSetting: {
+    blogUrl: string;
+    blogId: string;
+    blogUserName: string;
+    blogPassword: string;
+  }
+  githubSetting: {
+    repo: string;
+    branch: string;
+    token: string;
+    path: string;
+    customUrl: string;
+  }
+  giteeSetting: {
+    repo: string;
+    branch: string;
+    token: string;
+    path: string;
+    customUrl: string;
+  }
+  tencentSetting: {
+    secretId: string;
+    secretKey: string;
+    region: string;
+    bucketName: string;
+    path: string;
+  },
+  rename: boolean
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -36,10 +60,34 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   newWorkBlackDomains: "",
   deleteSource: false,
   imageDesc: "origin",
-  blogUrl: "",
-  blodId: "",
-  blogUserName: "",
-  blogPassword: "",
+  blogSetting: {
+    blogUrl: "",
+    blogId: "",
+    blogUserName: "",
+    blogPassword: "",
+  },
+  githubSetting: {
+    repo: 'sancijun/images',
+    branch: 'master', 
+    token: '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',
+    path: 'pics/',
+    customUrl: `https://cdn.jsdelivr.net/gh/sancijun/images/`
+  },
+  giteeSetting: {
+    repo: 'sancijun/pictures',
+    branch: 'master',
+    token: '0539aacd4a526ab64f293e3c2880ee09',
+    path: '/imgs/',
+    customUrl: 'https://cdn.jsdelivr.net/gh/sancijun/images/'
+  },
+  tencentSetting: {
+    secretId: 'AKIDQnyua3HI4ZomU1KODm59xVnqeDWZMtAB',
+    secretKey: 'pPilZ7PRDk36tQhiX7RVJsACyUlmY4LM',
+    region: 'ap-guangzhou',
+    bucketName: 'sancijun-1255318116',
+    path: '/test/',
+  },
+  rename: true,
 };
 
 export class SettingTab extends PluginSettingTab {
@@ -99,6 +147,9 @@ export class SettingTab extends PluginSettingTab {
       .addDropdown(cb =>
         cb
           .addOption("Blog", "Blog")
+          .addOption("GitHub", "GitHub")
+          .addOption("Gitee", "Gitee")
+          .addOption("Tencent", "Tencent")
           .addOption("PicGo", "PicGo(app)")
           .addOption("PicGo-Core", "PicGo-Core")
           .setValue(this.plugin.settings.uploader)
@@ -115,9 +166,9 @@ export class SettingTab extends PluginSettingTab {
         .addText(text =>
           text
             .setPlaceholder(t("Please input blog url"))
-            .setValue(this.plugin.settings.blogUrl)
+            .setValue(this.plugin.settings.blogSetting.blogUrl)
             .onChange(async key => {
-              this.plugin.settings.blogUrl = key;
+              this.plugin.settings.blogSetting.blogUrl = key;
               await this.plugin.saveSettings();
             })
         );
@@ -127,9 +178,9 @@ export class SettingTab extends PluginSettingTab {
         .addText(text =>
           text
             .setPlaceholder(t("Please input blog ID"))
-            .setValue(this.plugin.settings.blogId)
+            .setValue(this.plugin.settings.blogSetting.blogId)
             .onChange(async key => {
-              this.plugin.settings.blogId = key;
+              this.plugin.settings.blogSetting.blogId = key;
               await this.plugin.saveSettings();
             })
         );
@@ -140,9 +191,9 @@ export class SettingTab extends PluginSettingTab {
         .addText(text =>
           text
             .setPlaceholder(t("Please input blog user name"))
-            .setValue(this.plugin.settings.blogUserName)
+            .setValue(this.plugin.settings.blogSetting.blogUserName)
             .onChange(async key => {
-              this.plugin.settings.blogUserName = key;
+              this.plugin.settings.blogSetting.blogUserName = key;
               await this.plugin.saveSettings();
             })
         );
@@ -153,9 +204,192 @@ export class SettingTab extends PluginSettingTab {
         .addText(text =>
           text
             .setPlaceholder(t("Please input blog token"))
-            .setValue(this.plugin.settings.blogPassword)
+            .setValue(this.plugin.settings.blogSetting.blogPassword)
             .onChange(async key => {
-              this.plugin.settings.blogPassword = key;
+              this.plugin.settings.blogSetting.blogPassword = key;
+              await this.plugin.saveSettings();
+            })
+        );
+    }
+
+    if (this.plugin.settings.uploader === "GitHub") {
+      new Setting(containerEl)
+        .setName(t("Repository"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your repository"))
+            .setValue(this.plugin.settings.githubSetting.repo)
+            .onChange(async key => {
+              this.plugin.settings.githubSetting.repo = key;
+              await this.plugin.saveSettings();
+            })
+        );
+      new Setting(containerEl)
+        .setName(t("Branch"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your branch"))
+            .setValue(this.plugin.settings.githubSetting.branch)
+            .onChange(async key => {
+              this.plugin.settings.githubSetting.branch = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Token"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your token"))
+            .setValue(this.plugin.settings.githubSetting.token)
+            .onChange(async key => {
+              this.plugin.settings.githubSetting.token = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Path"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your path"))
+            .setValue(this.plugin.settings.githubSetting.path)
+            .onChange(async key => {
+              this.plugin.settings.githubSetting.path = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Custom URL"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input custom URL"))
+            .setValue(this.plugin.settings.githubSetting.customUrl)
+            .onChange(async key => {
+              this.plugin.settings.githubSetting.customUrl = key;
+              await this.plugin.saveSettings();
+            })
+        );
+    }
+
+    if (this.plugin.settings.uploader === "Gitee") {
+      new Setting(containerEl)
+        .setName(t("Repository"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your repository"))
+            .setValue(this.plugin.settings.giteeSetting.repo)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.repo = key;
+              await this.plugin.saveSettings();
+            })
+        );
+      new Setting(containerEl)
+        .setName(t("Branch"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your branch"))
+            .setValue(this.plugin.settings.giteeSetting.branch)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.branch = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Token"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your token"))
+            .setValue(this.plugin.settings.giteeSetting.token)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.token = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Path"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your path"))
+            .setValue(this.plugin.settings.giteeSetting.path)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.path = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Custom URL"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input custom URL"))
+            .setValue(this.plugin.settings.giteeSetting.customUrl)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.customUrl = key;
+              await this.plugin.saveSettings();
+            })
+        );
+    }
+
+    if (this.plugin.settings.uploader === "Tencent") {
+      new Setting(containerEl)
+        .setName(t("Secret ID"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your secret ID"))
+            .setValue(this.plugin.settings.tencentSetting.secretId)
+            .onChange(async key => {
+              this.plugin.settings.tencentSetting.secretId = key;
+              await this.plugin.saveSettings();
+            })
+        );
+      new Setting(containerEl)
+        .setName(t("Secret Key"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your secret key"))
+            .setValue(this.plugin.settings.tencentSetting.secretKey)
+            .onChange(async key => {
+              this.plugin.settings.tencentSetting.secretKey = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Region"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your region"))
+            .setValue(this.plugin.settings.tencentSetting.region)
+            .onChange(async key => {
+              this.plugin.settings.tencentSetting.region = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Bucket"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your bucket name"))
+            .setValue(this.plugin.settings.giteeSetting.path)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.path = key;
+              await this.plugin.saveSettings();
+            })
+        );
+
+      new Setting(containerEl)
+        .setName(t("Path"))
+        .addText(text =>
+          text
+            .setPlaceholder(t("Please input your path"))
+            .setValue(this.plugin.settings.giteeSetting.customUrl)
+            .onChange(async key => {
+              this.plugin.settings.giteeSetting.customUrl = key;
               await this.plugin.saveSettings();
             })
         );
@@ -219,6 +453,19 @@ export class SettingTab extends PluginSettingTab {
           );
       }
     }
+
+    new Setting(containerEl)
+        .setName(t("Rename"))
+        .setDesc(t("Rename Desc"))
+        .addToggle(toggle =>
+          toggle
+            .setValue(this.plugin.settings.rename)
+            .onChange(async value => {
+              this.plugin.settings.rename = value;
+              this.display();
+              await this.plugin.saveSettings();
+            })
+        );
 
     // image desc setting
     new Setting(containerEl)

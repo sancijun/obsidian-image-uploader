@@ -8,6 +8,7 @@ interface Image {
 }
 // ![](./dsa/aa.png) local image should has ext
 // ![](https://dasdasda) internet image should not has ext
+// MARK [[./dsa/aa.png]] 
 const REGEX_FILE = /\!\[(.*?)\]\((\S+\.\w+)\)|\!\[(.*?)\]\((https?:\/\/.*?)\)/g;
 const REGEX_WIKI_FILE = /\!\[\[(.*?)(\s*?\|.*?)?\]\]/g;
 export default class Helper {

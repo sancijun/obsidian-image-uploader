@@ -25,7 +25,7 @@ import {
   getUrlAsset,
   arrayToObject,
 } from "./utils";
-import { PicGoUploader, PicGoCoreUploader, BlogUploader } from "./uploader";
+import { PicGoUploader, PicGoCoreUploader, BlogUploader, GithubUploader, GiteeUploader, TencentCosUploader } from "./uploader";
 import { PicGoDeleter } from "./deleter";
 import Helper from "./helper";
 import { t } from "./lang/helpers";
@@ -46,7 +46,10 @@ export default class imageAutoUploadPlugin extends Plugin {
   picGoDeleter: PicGoDeleter;
   picGoCoreUploader: PicGoCoreUploader;
   blogUploader: BlogUploader;
-  uploader: PicGoUploader | PicGoCoreUploader | BlogUploader;
+  githubUploader: GithubUploader;
+  giteeUploader: GiteeUploader;
+  tencentCosUploader: TencentCosUploader;
+  uploader: PicGoUploader | PicGoCoreUploader | BlogUploader | GithubUploader | GiteeUploader | TencentCosUploader;
 
   async loadSettings() {
     this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
@@ -66,6 +69,9 @@ export default class imageAutoUploadPlugin extends Plugin {
     this.picGoDeleter = new PicGoDeleter(this);
     this.picGoCoreUploader = new PicGoCoreUploader(this.settings, this);
     this.blogUploader = new BlogUploader(this.settings, this);
+    this.githubUploader = new GithubUploader(this.settings, this);
+    this.giteeUploader = new GiteeUploader(this.settings, this);
+    this.tencentCosUploader = new TencentCosUploader(this.settings, this);
 
     if (this.settings.uploader === "PicGo") {
       this.uploader = this.picGoUploader;
@@ -76,6 +82,12 @@ export default class imageAutoUploadPlugin extends Plugin {
       }
     } else if(this.settings.uploader === "Blog") {
       this.uploader = this.blogUploader;
+    } else if(this.settings.uploader === "GitHub") {
+      this.uploader = this.githubUploader;
+    } else if(this.settings.uploader === "Gitee") {
+      this.uploader = this.giteeUploader;
+    } else if(this.settings.uploader === "Tencent") {
+      this.uploader = this.tencentCosUploader;
     } else {
       new Notice("unknown uploader");
     }

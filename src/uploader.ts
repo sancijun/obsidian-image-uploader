@@ -1,10 +1,13 @@
 import { PluginSettings } from "./setting";
 import { streamToString, getLastImage } from "./utils";
-import { exec, spawnSync, spawn } from "child_process";
+import { exec } from "child_process";
 import { Notice, requestUrl } from "obsidian";
 import imageAutoUploadPlugin from "./main";
 import * as fs from 'fs';
 import { parseString } from 'xml2js';
+import * as path from 'path';
+import COS from 'cos-js-sdk-v5';
+
 
 export interface PicGoResponse {
   success: string;
@@ -186,7 +189,7 @@ export class PicGoCoreUploader {
   }
 }
 
-export class BlogUploader {
+export abstract class BaseUploader {
   settings: PluginSettings;
   plugin: imageAutoUploadPlugin;
 
@@ -203,16 +206,16 @@ export class BlogUploader {
       let imageData: Buffer;
 
       if (imagePath.startsWith('http')) {
-        // If the path is an HTTP URL, download the image data first
         const response = await requestUrl(imagePath.toString());
         imageData = await Buffer.from(response.text);
       } else {
-        // If it is a local path, read the image directly
         imageData = fs.readFileSync(imagePath.toString());
       }
-
-      const mediaInfo = await this.upload(imageData.toString('base64'));
-      urls.push(mediaInfo);
+      const fileName = this.settings.rename
+        ? `${this.getCurrentTimestamp()}${path.extname(imagePath.toString())}`
+        : path.basename(imagePath.toString());
+      const imageUrl = await this.upload(imageData.toString('base64'), fileName);
+      urls.push(imageUrl);
     }
     console.log('urls', urls)
     return {
@@ -226,9 +229,10 @@ export class BlogUploader {
     const urls = [];
     // 处理每个文件
     for (let i = 0; i < clipboardData.files.length; i++) {
+      const fileName = `${this.getCurrentTimestamp()}${path.extname(clipboardData.files[i].name)}`;
       const imageData = await this.fileToBase64(clipboardData.files[i]);
-      const url = await this.upload(imageData);
-      urls.push(url)
+      const imageUrl = await this.upload(imageData, fileName);
+      urls.push(imageUrl)
     }
     console.log('urls', urls)
     return {
@@ -241,26 +245,46 @@ export class BlogUploader {
   async fileToBase64(file: File): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
-  
+
       reader.onload = () => {
         const base64String = reader.result as string;
         const base64 = base64String.split(",")[1]; // 去除前缀 "data:xxx;base64,"
         resolve(base64);
       };
-  
+
       reader.onerror = () => {
         reject(new Error("无法读取文件"));
       };
-  
+
       reader.readAsDataURL(file);
     });
   }
 
-  async upload(imageData: string): Promise<string> {
-    const metaWeblogUrl = this.settings.blogUrl;
-    const blogId = this.settings.blodId;
-    const username = this.settings.blogUserName;
-    const password = this.settings.blogPassword;
+  getCurrentTimestamp(): string {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+
+    const formattedTimestamp = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
+    return formattedTimestamp;
+  }
+
+  abstract upload(imageData: string, fileName: string): Promise<string>;
+}
+
+export class BlogUploader extends BaseUploader {
+
+  async upload(imageData: string, fileName: string): Promise<string> {
+    const metaWeblogUrl = this.settings.blogSetting.blogId;
+    const blogId = this.settings.blogSetting.blogId;
+    const username = this.settings.blogSetting.blogUserName;
+    const password = this.settings.blogSetting.blogPassword;
 
     const imageDataInfo = {
       name: 'image.jpg',
@@ -270,50 +294,50 @@ export class BlogUploader {
 
     // Convert imageDataInfo to a string in XML-RPC format
     const xmlData = `<?xml version="1.0"?>
-        <methodCall>
-            <methodName>metaWeblog.newMediaObject</methodName>
-            <params>
-                <param>
-                    <value>
-                        <string>${blogId}</string>
-                    </value>
-                </param>
-                <param>
-                    <value>
-                        <string>${username}</string>
-                    </value>
-                </param>
-                <param>
-                    <value>
-                        <string>${password}</string>
-                    </value>
-                </param>
-                <param>
-                    <value>
-                        <struct>
-                            <member>
-                                <name>name</name>
-                                <value>
-                                    <string>${imageDataInfo.name}</string>
-                                </value>
-                            </member>
-                            <member>
-                                <name>type</name>
-                                <value>
-                                    <string>${imageDataInfo.type}</string>
-                                </value>
-                            </member>
-                            <member>
-                                <name>bits</name>
-                                <value>
-                                    <base64>${imageDataInfo.bits}</base64>
-                                </value>
-                            </member>
-                        </struct>
-                    </value>
-                </param>
-            </params>
-        </methodCall>`;
+            <methodCall>
+                <methodName>metaWeblog.newMediaObject</methodName>
+                <params>
+                    <param>
+                        <value>
+                            <string>${blogId}</string>
+                        </value>
+                    </param>
+                    <param>
+                        <value>
+                            <string>${username}</string>
+                        </value>
+                    </param>
+                    <param>
+                        <value>
+                            <string>${password}</string>
+                        </value>
+                    </param>
+                    <param>
+                        <value>
+                            <struct>
+                                <member>
+                                    <name>name</name>
+                                    <value>
+                                        <string>${imageDataInfo.name}</string>
+                                    </value>
+                                </member>
+                                <member>
+                                    <name>type</name>
+                                    <value>
+                                        <string>${imageDataInfo.type}</string>
+                                    </value>
+                                </member>
+                                <member>
+                                    <name>bits</name>
+                                    <value>
+                                        <base64>${imageDataInfo.bits}</base64>
+                                    </value>
+                                </member>
+                            </struct>
+                        </value>
+                    </param>
+                </params>
+            </methodCall>`;
 
     const headers = {
       'Content-Type': 'text/xml', // Set the correct Content-Type for XML-RPC
@@ -327,7 +351,6 @@ export class BlogUploader {
     });
 
     const mediaInfo = await response.text;
-    console.log('mediaInfo:', mediaInfo);
     const imageUrl = await this.parseMediaInfo(mediaInfo);
     console.log('Image URL:', imageUrl);
     return imageUrl;
@@ -347,4 +370,109 @@ export class BlogUploader {
       });
     });
   }
+}
+
+export class GithubUploader extends BaseUploader {
+
+  async upload(imageData: string, fileName: string): Promise<string> {
+    const fileKey = path.join(this.settings.githubSetting.path, fileName);
+    const apiUrl = `https://api.github.com/repos/${this.settings.githubSetting.repo}/contents/${fileKey}`;
+
+    const requestData = {
+      message: `Upload ${fileKey}`,
+      branch: this.settings.githubSetting.branch,
+      content: imageData,
+    };
+
+    const response = await requestUrl({
+      url: apiUrl,
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${this.settings.githubSetting.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    const customUrl = this.settings.githubSetting.customUrl.trim();
+    const imageUrl = customUrl === '' ? response.json.content.download_url : customUrl + response.json.content.path;
+    return imageUrl;
+  }
+}
+
+export class GiteeUploader extends BaseUploader {
+
+  async upload(imageData: string, fileName: string): Promise<string> {
+    const fileKey = path.join(this.settings.giteeSetting.path, fileName);
+    const apiUrl = `https://gitee.com/api/v5/repos/${this.settings.giteeSetting.repo}/contents/${fileKey}`;
+
+    // Build the API request data
+    const requestData = {
+      access_token: this.settings.giteeSetting.token,
+      message: `Upload ${fileKey}`,
+      branch: this.settings.giteeSetting.branch,
+      content: imageData,
+    };
+      const response = await requestUrl({
+        url: apiUrl,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+        console.log("gitee 200: ", response);
+        const downloadUrl = response.json.content.download_url;
+        return downloadUrl;
+  }
+}
+
+export class TencentCosUploader extends BaseUploader {
+
+  cos = new COS({
+    SecretId: this.settings.tencentSetting.secretId,
+    SecretKey: this.settings.tencentSetting.secretKey,
+  });
+
+  async upload(imageData: string, fileName: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const fileKey = this.settings.tencentSetting.path + fileName;
+
+      this.cos.putObject(
+        {
+          Bucket: this.settings.tencentSetting.bucketName,
+          Region: this.settings.tencentSetting.region,
+          Key: fileKey,
+          StorageClass: 'STANDARD',
+          Body: this.base64ToBlob(imageData),
+        },
+        (err, data) => {
+          if (err) {
+            console.log("cos upload:", err)
+            reject(err);
+          } else {
+            const location = data.Location || '';
+            resolve(`https://${location}`);
+          }
+        }
+      );
+    });
+  }
+
+  base64ToBlob(base64String: string, contentType: string = ''): Blob {
+    // 解码 base64 字符串为二进制数据
+    const binaryString = atob(base64String);
+    const byteArray = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      byteArray[i] = binaryString.charCodeAt(i);
+    }
+
+    // 创建 Blob 对象
+    if (contentType === '') {
+      contentType = 'application/octet-stream'; // 默认为二进制流
+    }
+    return new Blob([byteArray], { type: contentType });
+  }
+
 }
