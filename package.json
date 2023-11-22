@@ -1,6 +1,6 @@
 {
   "name": "easy-image-uploader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "自动将图片直接上传到博客网站获取对应图片链接，或者基于 PicGo 自动上传到图床。",
   "main": "main.js",
@@ -37,7 +37,6 @@
     "cos-js-sdk-v5": "^1.4.20",
     "file-base64": "^1.0.0",
     "fix-path": "^4.0.0",
-    "gm": "^1.25.0",
     "image-type": "^5.2.0",
     "xml2js": "^0.6.2"
   }

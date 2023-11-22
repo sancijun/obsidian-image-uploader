@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { parseString } from 'xml2js';
 import * as path from 'path';
 import COS from 'cos-js-sdk-v5';
-import gm from 'gm';
+
 
 export interface PicGoResponse {
   success: string;
@@ -214,8 +214,7 @@ export abstract class BaseUploader {
       const fileName = this.settings.rename
         ? `${getCurrentTimestamp()}${path.extname(imagePath.toString())}`
         : path.basename(imagePath.toString());
-      const imageBase64String = this.settings.watermark ?
-        await this.addWatermark(imageData) : imageData.toString('base64')
+      const imageBase64String = imageData.toString('base64')
       const imageUrl = await this.upload(imageBase64String, fileName);
       urls.push(imageUrl);
     }
@@ -232,8 +231,7 @@ export abstract class BaseUploader {
     // 处理每个文件
     for (let i = 0; i < clipboardData.files.length; i++) {
       const fileName = `${getCurrentTimestamp()}${path.extname(clipboardData.files[i].name)}`;
-      const imageBase64String = this.settings.watermark ?
-        await this.addWatermark(await fileToBuffer(clipboardData.files[i])) : await fileToBase64(clipboardData.files[i]);
+      const imageBase64String = await fileToBase64(clipboardData.files[i]);
       const imageUrl = await this.upload(imageBase64String, fileName);
       urls.push(imageUrl)
     }
@@ -246,36 +244,6 @@ export abstract class BaseUploader {
   }
 
   abstract upload(imageData: string, fileName: string): Promise<string>;
-
-  async addWatermark(imageData: Buffer): Promise<string> {
-    const { fontFamily, fontSize, image, position, text, textColor } = this.settings.watermarkSetting;
-
-    let imageMagick = gm('');
-
-    // Handle text watermark
-    if (text) {
-      imageMagick = imageMagick.font(fontFamily)
-        .fontSize(fontSize)
-        .fill(textColor)
-        .gravity(position)
-        .drawText(10, 10, text); // Adjust coordinates as needed for position
-      
-    }
-
-    // Handle image watermark
-    if (image) {
-      imageMagick = imageMagick.gravity(position).composite(image);
-    }
-    let base64String;
-    imageMagick.toBuffer('PNG',function (err, buffer) {
-      if (err) {
-        console.log('err!', err);
-      }
-      base64String = buffer.toString('base64');
-    })
-    return base64String || '';
-  }
-
 }
 
 export class BlogUploader extends BaseUploader {
@@ -375,8 +343,8 @@ export class BlogUploader extends BaseUploader {
 export class GithubUploader extends BaseUploader {
 
   async upload(imageData: string, fileName: string): Promise<string> {
-    const fileKey = path.join(this.settings.githubSetting.path, fileName);
-    const apiUrl = `https://api.github.com/repos/${this.settings.githubSetting.repo}/contents/${fileKey}`;
+    const fileKey = path.join("/", this.settings.githubSetting.path, "/", fileName);
+    const apiUrl = `https://api.github.com/repos/${this.settings.githubSetting.repo}/contents${fileKey}`;
 
     const requestData = {
       message: `Upload ${fileKey}`,
@@ -403,8 +371,8 @@ export class GithubUploader extends BaseUploader {
 export class GiteeUploader extends BaseUploader {
 
   async upload(imageData: string, fileName: string): Promise<string> {
-    const fileKey = path.join(this.settings.giteeSetting.path, fileName);
-    const apiUrl = `https://gitee.com/api/v5/repos/${this.settings.giteeSetting.repo}/contents/${fileKey}`;
+    const fileKey = path.join("/", this.settings.giteeSetting.path, "/", fileName);
+    const apiUrl = `https://gitee.com/api/v5/repos/${this.settings.giteeSetting.repo}/contents${fileKey}`;
 
     // Build the API request data
     const requestData = {
@@ -437,7 +405,7 @@ export class TencentCosUploader extends BaseUploader {
 
   async upload(imageData: string, fileName: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      const fileKey = this.settings.tencentSetting.path + fileName;
+      const fileKey = path.join("/", this.settings.tencentSetting.path, "/", fileName);
 
       this.cos.putObject(
         {

@@ -20,8 +20,7 @@ export default {
     json(),
     copy({
       targets: [
-        { src: "manifest.json", dest: "easy-image-uploader" },
-        { src: "./src/fonts", dest: "easy-image-uploader" },
+        { src: "manifest.json", dest: "easy-image-uploader" }
       ],
       hook: "buildStart",
     }),

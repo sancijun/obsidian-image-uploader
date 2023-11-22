@@ -71,17 +71,5 @@ export default {
   "Region": "Region",
   "Please input your region": "Please input your region",
   "Bucket": "Bucket",
-  "Please input your bucket name": "Please input your bucket name",
-  "Watermark": "Watermark",
-  "Watermark Desc": "Whether to add watermark to image.",
-  "Watermark Text": "Watermark Text",
-  "Please input watermark text content": "Please input watermark text content",
-  "Font File Path": "Font File Path",
-  "Please input the font file path": "Please input the font file path",
-  "Font Size": "Font Size",
-  "Please input font size": "Please input font size",
-  "Watermark Image Path": "Watermark Image Path",
-  "Please input watermark image file path": "Please input watermark image file path",
-  "Watermark Position": "Watermark Position",
-
+  "Please input your bucket name": "Please input your bucket name"
 };
