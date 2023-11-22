@@ -1,9 +1,11 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, FileSystemAdapter, PluginSettingTab, Setting } from "obsidian";
 import imageAutoUploadPlugin from "./main";
 import { t } from "./lang/helpers";
 import { getOS } from "./utils";
+import * as path from 'path';
 
 export interface PluginSettings {
+  basePath: string;
   uploadByClipSwitch: boolean;
   uploadServer: string;
   deleteServer: string;
@@ -44,10 +46,20 @@ export interface PluginSettings {
     bucketName: string;
     path: string;
   },
-  rename: boolean
+  rename: boolean,
+  watermark: boolean,
+  watermarkSetting: {
+    fontFamily: string;
+    fontSize: number;
+    image: string;
+    position: string;
+    text: string;
+    textColor: string;
+  }
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
+  basePath: '',
   uploadByClipSwitch: true,
   uploader: "PicGo",
   uploadServer: "http://127.0.0.1:36677/upload",
@@ -88,6 +100,15 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     path: '/test/',
   },
   rename: true,
+  watermark: true,
+  watermarkSetting: {
+    fontFamily: '',
+    fontSize: 35,
+    image: '',
+    position: 'right-bottom',
+    text: '@三此君',
+    textColor: '#868e96',
+  }
 };
 
 export class SettingTab extends PluginSettingTab {
@@ -96,6 +117,11 @@ export class SettingTab extends PluginSettingTab {
   constructor(app: App, plugin: imageAutoUploadPlugin) {
     super(app, plugin);
     this.plugin = plugin;
+    if(this.plugin.settings.watermarkSetting.fontFamily === '') {
+      const basePath = (this.app.vault.adapter as FileSystemAdapter).getBasePath();
+      this.plugin.settings.watermarkSetting.fontFamily = path.join(basePath, plugin.manifest.dir, 'fonts/sancijun.tff')
+    }
+    console.log("this.plugin.settings.watermarkSetting.fontFamily:", this.plugin.settings.watermarkSetting.fontFamily)
   }
 
   display(): void {
@@ -466,6 +492,92 @@ export class SettingTab extends PluginSettingTab {
               await this.plugin.saveSettings();
             })
         );
+
+    new Setting(containerEl)
+      .setName(t("Watermark"))
+      .setDesc(t("Watermark Desc"))
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.watermark)
+          .onChange(async value => {
+            this.plugin.settings.watermark = value;
+            this.display();
+            await this.plugin.saveSettings();
+          })
+      );
+
+    if (this.plugin.settings.watermark) {
+
+        new Setting(containerEl)
+          .setName(t("Watermark Text"))
+          .addText(text =>
+            text
+              .setPlaceholder(t("Please input watermark text content"))
+              .setValue(this.plugin.settings.watermarkSetting.fontFamily)
+              .onChange(async value => {
+                this.plugin.settings.watermarkSetting.fontFamily = value;
+                await this.plugin.saveSettings();
+              })
+          );
+
+        new Setting(containerEl)
+          .setName(t("Font File Path"))
+          .setDesc(t("Font File Path"))
+          .addText(text =>
+            text
+              .setPlaceholder(t("Please input the font file path"))
+              .setValue(this.plugin.settings.watermarkSetting.fontFamily)
+              .onChange(async value => {
+                this.plugin.settings.watermarkSetting.fontFamily = value;
+                await this.plugin.saveSettings();
+              })
+          );
+        
+          new Setting(containerEl)
+          .setName(t("Font Size"))
+          .addText(text =>
+            text
+              .setPlaceholder(t("Please input font size"))
+              .setValue(this.plugin.settings.watermarkSetting.fontSize.toString())
+              .onChange(async value => {
+                this.plugin.settings.watermarkSetting.fontSize = Number.parseInt(value);
+                await this.plugin.saveSettings();
+              })
+          );
+
+        new Setting(containerEl)
+          .setName(t("Watermark Image Path"))
+          .setDesc(t("Watermark Image Path"))
+          .addText(text =>
+            text
+              .setPlaceholder(t("Please input watermark image file path"))
+              .setValue(this.plugin.settings.watermarkSetting.image)
+              .onChange(async value => {
+                this.plugin.settings.watermarkSetting.image = value;
+                await this.plugin.saveSettings();
+              })
+          );
+        
+        new Setting(containerEl)
+          .setName(t("Watermark Position"))
+          .setDesc(t("Watermark Position"))
+          .addDropdown(cb =>
+            cb
+              .addOption("Center", "Center")
+              .addOption("Left-Top", "NorthWest") 
+              .addOption("Left-Bottom", "SouthWest") 
+              .addOption("Right-Top", "NorthEast")
+              .addOption("Right-Bottom", "SouthEast")
+              .setValue(this.plugin.settings.imageDesc)
+              .onChange(async (value) => {
+                this.plugin.settings.watermarkSetting.position = value;
+                this.display();
+                await this.plugin.saveSettings();
+              })
+          );
+  
+    
+      }
 
     // image desc setting
     new Setting(containerEl)

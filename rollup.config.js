@@ -7,7 +7,7 @@ import copy from "rollup-plugin-copy";
 export default {
   input: "src/main.ts",
   output: {
-    dir: "./dist",
+    dir: "./easy-image-uploader",
     sourcemap: "inline",
     format: "cjs",
     exports: "default",
@@ -19,8 +19,11 @@ export default {
     commonjs(),
     json(),
     copy({
-      targets: [{ src: "manifest.json", dest: "dist" }],
-      hook: 'buildStart',
-    })
+      targets: [
+        { src: "manifest.json", dest: "easy-image-uploader" },
+        { src: "./src/fonts", dest: "easy-image-uploader" },
+      ],
+      hook: "buildStart",
+    }),
   ],
 };

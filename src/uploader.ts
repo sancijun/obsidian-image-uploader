@@ -1,5 +1,5 @@
 import { PluginSettings } from "./setting";
-import { streamToString, getLastImage } from "./utils";
+import { streamToString, getLastImage, getCurrentTimestamp, fileToBase64, fileToBuffer } from "./utils";
 import { exec } from "child_process";
 import { Notice, requestUrl } from "obsidian";
 import imageAutoUploadPlugin from "./main";
@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { parseString } from 'xml2js';
 import * as path from 'path';
 import COS from 'cos-js-sdk-v5';
-
+import gm from 'gm';
 
 export interface PicGoResponse {
   success: string;
@@ -212,9 +212,11 @@ export abstract class BaseUploader {
         imageData = fs.readFileSync(imagePath.toString());
       }
       const fileName = this.settings.rename
-        ? `${this.getCurrentTimestamp()}${path.extname(imagePath.toString())}`
+        ? `${getCurrentTimestamp()}${path.extname(imagePath.toString())}`
         : path.basename(imagePath.toString());
-      const imageUrl = await this.upload(imageData.toString('base64'), fileName);
+      const imageBase64String = this.settings.watermark ?
+        await this.addWatermark(imageData) : imageData.toString('base64')
+      const imageUrl = await this.upload(imageBase64String, fileName);
       urls.push(imageUrl);
     }
     console.log('urls', urls)
@@ -229,9 +231,10 @@ export abstract class BaseUploader {
     const urls = [];
     // 处理每个文件
     for (let i = 0; i < clipboardData.files.length; i++) {
-      const fileName = `${this.getCurrentTimestamp()}${path.extname(clipboardData.files[i].name)}`;
-      const imageData = await this.fileToBase64(clipboardData.files[i]);
-      const imageUrl = await this.upload(imageData, fileName);
+      const fileName = `${getCurrentTimestamp()}${path.extname(clipboardData.files[i].name)}`;
+      const imageBase64String = this.settings.watermark ?
+        await this.addWatermark(await fileToBuffer(clipboardData.files[i])) : await fileToBase64(clipboardData.files[i]);
+      const imageUrl = await this.upload(imageBase64String, fileName);
       urls.push(imageUrl)
     }
     console.log('urls', urls)
@@ -242,40 +245,37 @@ export abstract class BaseUploader {
     };
   }
 
-  async fileToBase64(file: File): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        const base64 = base64String.split(",")[1]; // 去除前缀 "data:xxx;base64,"
-        resolve(base64);
-      };
-
-      reader.onerror = () => {
-        reject(new Error("无法读取文件"));
-      };
-
-      reader.readAsDataURL(file);
-    });
-  }
-
-  getCurrentTimestamp(): string {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-    const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
-
-    const formattedTimestamp = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
-    return formattedTimestamp;
-  }
-
   abstract upload(imageData: string, fileName: string): Promise<string>;
+
+  async addWatermark(imageData: Buffer): Promise<string> {
+    const { fontFamily, fontSize, image, position, text, textColor } = this.settings.watermarkSetting;
+
+    let imageMagick = gm('');
+
+    // Handle text watermark
+    if (text) {
+      imageMagick = imageMagick.font(fontFamily)
+        .fontSize(fontSize)
+        .fill(textColor)
+        .gravity(position)
+        .drawText(10, 10, text); // Adjust coordinates as needed for position
+      
+    }
+
+    // Handle image watermark
+    if (image) {
+      imageMagick = imageMagick.gravity(position).composite(image);
+    }
+    let base64String;
+    imageMagick.toBuffer('PNG',function (err, buffer) {
+      if (err) {
+        console.log('err!', err);
+      }
+      base64String = buffer.toString('base64');
+    })
+    return base64String || '';
+  }
+
 }
 
 export class BlogUploader extends BaseUploader {
@@ -349,7 +349,7 @@ export class BlogUploader extends BaseUploader {
       headers: headers,
       body: xmlData,
     });
-    
+
     const mediaInfo = await response.text;
     const imageUrl = await this.parseMediaInfo(mediaInfo);
     console.log('Image URL:', imageUrl);
@@ -413,18 +413,18 @@ export class GiteeUploader extends BaseUploader {
       branch: this.settings.giteeSetting.branch,
       content: imageData,
     };
-      const response = await requestUrl({
-        url: apiUrl,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
+    const response = await requestUrl({
+      url: apiUrl,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
 
-        console.log("gitee 200: ", response);
-        const downloadUrl = response.json.content.download_url;
-        return downloadUrl;
+    console.log("gitee 200: ", response);
+    const downloadUrl = response.json.content.download_url;
+    return downloadUrl;
   }
 }
 

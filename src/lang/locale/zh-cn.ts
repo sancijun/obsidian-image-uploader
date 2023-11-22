@@ -69,5 +69,16 @@ export default {
   "Region": "Region",
   "Please input your region": "请输入 Region",
   "Bucket": "Bucket",
-  "Please input your bucket name": "请输入 Bucket Name"
+  "Please input your bucket name": "请输入 Bucket Name",
+  "Watermark": "水印",
+  "Watermark Desc": "是否添加水印",
+  "Watermark Text": "水印文本内容",
+  "Please input watermark text content": "请输入水印文本内容",
+  "Font File Path": "字体文件路径",
+  "Please input the font file path": "请输入字体文件路径",
+  "Font Size": "字体大小",
+  "Please input font size": "请输入字体大小",
+  "Watermark Image Path": "水印图片路径",
+  "Please input watermark image file path": "请输入水印图片路径",
+  "Watermark Position": "水印位置",
 };
